@@ -12,8 +12,8 @@ module.exports = {
     },
 
     body: [
-      [MOVE, WORK, CARRY],
-      [MOVE, WORK, CARRY, CARRY, MOVE]
+      [MOVE, WORK, WORK, CARRY],
+      [MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, MOVE]
     ],
 
     behaviors: ["find_energy", "harvest", "transfer_energy_spawn", "transfer_energy_extensions", "build_structures", "upgrade_controller"]
@@ -35,7 +35,8 @@ module.exports = {
     body: [
       null,
       null,
-      [MOVE, MOVE, WORK, WORK, WORK, WORK, WORK]
+      [MOVE, WORK, WORK, WORK, WORK, WORK],
+      [MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK]
     ],
     behaviors: [
       "miner_harvest"
@@ -60,7 +61,7 @@ module.exports = {
       [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY]
     ],
 
-    behaviors: ["find_energy_transporter", "transfer_energy_extensions", "transfer_energy_spawn", "transfer_energy_links", "transfer_energy_storage", "transfer_energy_upgrader"]
+    behaviors: ["find_energy_transporter", "transfer_energy_extensions", "transfer_energy_spawn", "transfer_energy_links", "transfer_energy_upgrader", "transfer_energy_storage"]
   },
 
   "upgrader" : {
@@ -69,7 +70,7 @@ module.exports = {
 
     canBuild : function(rc) {
       var controller = rc.getController();
-      return ( controller && controller.my && rc.getCreeps('upgrader').length < 1);
+      return ( controller && controller.my && rc.getCreeps('upgrader').length < 2);
 
       // var max = controller.getFreeFields();
       // if ( max > 3 ) {
@@ -81,7 +82,7 @@ module.exports = {
     body : [
       null,
       null,
-      [MOVE, MOVE, WORK, WORK, WORK, WORK, CARRY, CARRY],
+      [MOVE, WORK, WORK, WORK, WORK, CARRY, CARRY],
       [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY],
       [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY],
       [MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY],
@@ -97,14 +98,14 @@ module.exports = {
     levelMin : 3,
 
     canBuild : function(rc) {
-      return rc.getCreeps("constructor").length < 3;
+      return rc.getCreeps("constructor").length < 2;
     },
 
     body : [
       null,
       null,
-      [MOVE, WORK, CARRY],
-      [MOVE, MOVE, WORK, CARRY],
+      [MOVE, MOVE, WORK, WORK, CARRY, CARRY],
+      [MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY],
       [MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY],
       [MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY],
     ],
@@ -113,23 +114,47 @@ module.exports = {
   },
 
   'attacker': {
-    produceGlobal : true,
+    produceGlobal : false,
     priority : 5,
     minLevel : 4,
 
     canBuild : function(rc) {
         var flags = _.filter(Game.flags, { 'color' : COLOR_RED} );
         if ( flags.length === 0 ) return false;
-
         var attackers = _.filter(Game.creeps, { 'memory' : { 'role' : 'attacker'}});
-        return attackers.length < 2;
+        return attackers.length < 1;
     },
 
     body : [
-      [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
+      [TOUGH, ATTACK, MOVE, MOVE],
+      [TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE],
+      [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
     ],
 
     behaviors : [ 'goto_red_flag', 'attack_enemy' ]
+
+  },
+  
+  'scout': {
+    produceGlobal : false,
+    priority : 6,
+    minLevel : 3,
+
+    canBuild : function(rc) {
+        var flags = _.filter(Game.flags, { 'color' : COLOR_WHITE} );
+        if ( flags.length === 0 ) return false;
+        var scouts = _.filter(Game.creeps, { 'memory' : { 'role' : 'scout'}});
+        return scouts.length < 3;
+    },
+
+    body : [
+      [CARRY, CARRY, WORK, MOVE, MOVE],
+      [CARRY, CARRY, WORK, WORK, MOVE, MOVE],
+      [CARRY, CARRY, WORK, WORK, WORK, MOVE, MOVE, MOVE],
+      [CARRY, CARRY, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE]
+    ],
+
+    behaviors : [ 'goto_white_flag', "claim_controller", "find_energy", "harvest", "transfer_energy_spawn", "transfer_energy_extensions", "build_structures", "upgrade_controller"]
 
   }
 
