@@ -2,33 +2,37 @@ var Behavior = require("_behavior");
 
 var b = new Behavior("harvest");
 
-b.when = function(creep, rc) {
-  return (creep.energy === 0);
+b.when = function (creep, rc) {
+  var sources = rc.getSourcesNotEmpty();
+  return (creep.energy === 0 && sources.length > 0);
 };
 
-b.completed = function(creep, rc) {
-  return (creep.energy === creep.energyCapacity);
+b.completed = function (creep, rc) {
+  if (!creep.getTarget()) return false;
+  if (creep.getTarget().energy == 0) return true;
+  return (creep.energy === creep.store.getCapacity(RESOURCE_ENERGY));
 };
 
-b.work = function(creep, rc) {
-  var source = creep.getTarget();
+b.work = function (creep, rc) {
+  var target = creep.getTarget();
 
-  if ( source === null ) {
-    var sources = rc.getSources();
-    if ( sources.length ) {
-      source = sources[0];
+  if (target === null) {
+    var sources = rc.getSourcesNotEmpty();
+    if (sources.length) {
+      // TODO Only choose source with enough space around      
+      // Source per Zufall auswählen
+      target = sources[Math.floor(Math.random() * sources.length)];
     }
   }
 
-  if ( source !== null ) {
-    creep.target = source.id;
-    if ( !creep.pos.isNearTo(source) ) {
-      creep.moveToEx(source);
+  if (target !== null) {
+    creep.target = target.id;
+    if (!creep.pos.isNearTo(target)) {
+      creep.travelTo(target);
     } else {
-      creep.harvest(source);
+      creep.harvest(target);
     }
   }
-
 };
 
 module.exports = b;
